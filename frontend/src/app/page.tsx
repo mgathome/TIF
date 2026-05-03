@@ -46,7 +46,7 @@ export default function HomePage() {
             </div>
           </div>
           <div className="hidden md:flex justify-center">
-            <Mascot size={260} />
+            <Mascot size={320} animated />
           </div>
         </div>
       </section>

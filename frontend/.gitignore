@@ -5,3 +5,7 @@ out
 *.log
 .DS_Store
 .vercel
+
+# Fichiers raw temporaires de decoupage des mascottes
+public/mascots/*_raw.png
+public/mascots/board.png
