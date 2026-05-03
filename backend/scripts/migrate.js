@@ -40,16 +40,25 @@ async function applied() {
 
 async function applyFile(filename) {
   const sql = fs.readFileSync(path.join(MIGRATIONS_DIR, filename), 'utf8');
-  console.log(`[migrate] applying ${filename}`);
+  // Certaines migrations (ex: ALTER TYPE ... ADD VALUE) ne peuvent pas
+  // tourner dans une transaction. On detecte via un commentaire @no-transaction.
+  const noTransaction = /--\s*@no-transaction/i.test(sql);
+  console.log(`[migrate] applying ${filename}${noTransaction ? ' (no-transaction)' : ''}`);
   const client = await pool.connect();
   try {
-    await client.query('BEGIN');
-    await client.query(sql);
-    await client.query('INSERT INTO _migrations (filename) VALUES ($1)', [filename]);
-    await client.query('COMMIT');
-    console.log(`[migrate] ✓ ${filename}`);
+    if (noTransaction) {
+      // On execute la migration en autocommit
+      await client.query(sql);
+      await client.query('INSERT INTO _migrations (filename) VALUES ($1)', [filename]);
+    } else {
+      await client.query('BEGIN');
+      await client.query(sql);
+      await client.query('INSERT INTO _migrations (filename) VALUES ($1)', [filename]);
+      await client.query('COMMIT');
+    }
+    console.log(`[migrate] OK ${filename}`);
   } catch (err) {
-    await client.query('ROLLBACK');
+    if (!noTransaction) await client.query('ROLLBACK');
     throw err;
   } finally {
     client.release();

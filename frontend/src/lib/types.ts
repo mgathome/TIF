@@ -55,7 +55,7 @@ export interface MenuItem {
 
 export type OrderStatus =
   | 'pending' | 'paid' | 'preparing' | 'ready'
-  | 'completed' | 'cancelled' | 'refunded';
+  | 'out_for_delivery' | 'completed' | 'cancelled' | 'refunded';
 
 export type OrderType = 'pickup' | 'delivery';
 
@@ -78,6 +78,7 @@ export interface Order {
   type: OrderType;
   scheduledFor: string;
   deliveryAddress?: string;
+  deliveryNotes?: string;
   customerNotes?: string;
   subtotalCents: number;
   deliveryFeeCents: number;

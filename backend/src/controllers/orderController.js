@@ -20,7 +20,7 @@ const createOrderSchema = z.object({
 });
 
 const updateStatusSchema = z.object({
-  status: z.enum(['preparing', 'ready', 'completed', 'cancelled']),
+  status: z.enum(['preparing', 'ready', 'out_for_delivery', 'completed', 'cancelled']),
 });
 
 // === Helpers ===
@@ -237,14 +237,17 @@ async function getOne(req, res) {
 }
 
 // === PATCH /api/orders/:id/status  (resto only) ===
+// Pickup : paid -> preparing -> ready -> completed
+// Delivery : paid -> preparing -> ready -> out_for_delivery -> completed
 const STATUS_TRANSITIONS = {
-  paid:       ['preparing', 'cancelled'],
-  preparing:  ['ready', 'cancelled'],
-  ready:      ['completed'],
-  completed:  [],
-  cancelled:  [],
-  pending:    ['cancelled'],
-  refunded:   [],
+  paid:              ['preparing', 'cancelled'],
+  preparing:         ['ready', 'cancelled'],
+  ready:             ['out_for_delivery', 'completed'],
+  out_for_delivery:  ['completed'],
+  completed:         [],
+  cancelled:         [],
+  pending:           ['cancelled'],
+  refunded:          [],
 };
 
 async function updateStatus(req, res) {
