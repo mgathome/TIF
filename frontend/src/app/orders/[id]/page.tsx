@@ -58,11 +58,24 @@ export default function OrderDetailPage() {
     <div className="section py-10 max-w-2xl">
       {justPaid && (
         <div className="mb-6 card p-5 bg-tif-yellow/30 border-l-4 border-tif-yellow flex items-center gap-4 animate-slide-up">
-          <Mascot size={64} />
+          <Mascot size={80} />
           <div>
             <div className="font-display font-bold">Merci pour votre commande !</div>
             <div className="text-sm text-tif-gray-700">
               Le restaurant va la préparer pour le créneau choisi.
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Tibo Express anime quand le livreur est en route */}
+      {order.status === 'out_for_delivery' && (
+        <div className="mb-6 card p-5 bg-tif-violet/10 border-l-4 border-tif-violet flex items-center gap-4 animate-slide-up">
+          <Mascot variant="tibo" size={80} />
+          <div>
+            <div className="font-display font-bold">En route vers vous !</div>
+            <div className="text-sm text-tif-gray-700">
+              Le livreur vient d'emporter votre commande.
             </div>
           </div>
         </div>

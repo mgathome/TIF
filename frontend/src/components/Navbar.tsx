@@ -18,7 +18,7 @@ export function Navbar() {
     return (
       <header className="bg-tif-violet text-white sticky top-0 z-40">
         <div className="section flex items-center justify-between h-16">
-          <Logo light />
+          <Logo light size="md" />
           <nav className="hidden sm:flex items-center gap-6 text-sm font-medium">
             <Link href="/dashboard" className="hover:text-tif-yellow">Tableau de bord</Link>
             <Link href="/dashboard/orders" className="hover:text-tif-yellow">Commandes</Link>
