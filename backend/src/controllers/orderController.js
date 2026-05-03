@@ -249,7 +249,7 @@ const STATUS_TRANSITIONS = {
 
 async function updateStatus(req, res) {
   const { rows } = await query(
-    `SELECT o.*, r.owner_id FROM orders o JOIN restaurants r ON r.id = o.restaurant_id WHERE o.id = $1 FOR UPDATE`,
+    `SELECT o.*, r.owner_id FROM orders o JOIN restaurants r ON r.id = o.restaurant_id WHERE o.id = $1`,
     [req.params.id]
   );
   if (rows.length === 0) throw new NotFound();
@@ -261,15 +261,20 @@ async function updateStatus(req, res) {
     throw new Conflict(`Cannot transition from ${o.status} to ${req.body.status}`);
   }
 
+  // Cast explicite vers l'enum order_status (sinon pg ne sait pas inferer le type)
   const { rows: updated } = await query(
-    'UPDATE orders SET status = $1, cancelled_at = CASE WHEN $1 = \'cancelled\' THEN NOW() ELSE cancelled_at END WHERE id = $2 RETURNING *',
+    `UPDATE orders
+     SET status = $1::order_status,
+         cancelled_at = CASE WHEN $1::order_status = 'cancelled' THEN NOW() ELSE cancelled_at END
+     WHERE id = $2
+     RETURNING *`,
     [req.body.status, req.params.id]
   );
 
-  // Notif côté client
+  // Notif cote client (data en jsonb avec cast explicite)
   await query(
     `INSERT INTO notifications (user_id, type, title, body, data)
-     VALUES ($1, 'order_status_changed', $2, $3, $4)`,
+     VALUES ($1, 'order_status_changed', $2, $3, $4::jsonb)`,
     [
       o.user_id,
       `Commande ${o.order_number} : ${req.body.status}`,
