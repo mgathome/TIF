@@ -1,0 +1,15 @@
+# Configuration Railway
+# Doc : https://docs.railway.app/reference/config-as-code
+
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+# Healthcheck via /health pour s'assurer que l'API est UP avant de router le trafic
+healthcheckPath = "/health"
+healthcheckTimeout = 30
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 5
+# Commande de démarrage (override possible dans l'UI Railway)
+startCommand = "npm run release"
