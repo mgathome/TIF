@@ -6,6 +6,8 @@ out
 .DS_Store
 .vercel
 
-# Fichiers raw temporaires de decoupage des mascottes
+# Fichiers temporaires de decoupage des mascottes
 public/mascots/*_raw.png
+public/mascots/*_crop.png
+public/mascots/*_alpha.png
 public/mascots/board.png
