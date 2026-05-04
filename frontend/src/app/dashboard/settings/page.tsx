@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
 import type { Restaurant } from '@/lib/types';
 import { Loading } from '@/components/Loading';
+import { ImageUpload } from '@/components/ImageUpload';
 
 export default function DashboardSettingsPage() {
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
@@ -26,6 +27,7 @@ export default function DashboardSettingsPage() {
           cuisineType: restaurant.cuisineType,
           phone: restaurant.phone,
           coverImageUrl: restaurant.coverImageUrl,
+          logoUrl: restaurant.logoUrl,
           isPublished: restaurant.isPublished,
           deliveryFeeCents: restaurant.deliveryFeeCents,
           minOrderCents: restaurant.minOrderCents,
@@ -50,18 +52,35 @@ export default function DashboardSettingsPage() {
     <div className="section py-10 max-w-2xl">
       <h1 className="font-display font-bold text-3xl mb-6">Paramètres</h1>
 
-      <div className="card p-5 mb-4 space-y-3">
+      <div className="card p-5 mb-4 space-y-4">
         <h2 className="font-semibold">Identité</h2>
-        <input className="input" value={restaurant.name}
+        <input className="input" placeholder="Nom" value={restaurant.name}
           onChange={(e) => setRestaurant({ ...restaurant, name: e.target.value })} />
-        <textarea className="input" rows={3} value={restaurant.description || ''}
+        <textarea className="input" rows={3} placeholder="Description" value={restaurant.description || ''}
           onChange={(e) => setRestaurant({ ...restaurant, description: e.target.value })} />
         <input className="input" placeholder="Type de cuisine" value={restaurant.cuisineType || ''}
           onChange={(e) => setRestaurant({ ...restaurant, cuisineType: e.target.value })} />
-        <input className="input" placeholder="Image de couverture (URL)" value={restaurant.coverImageUrl || ''}
-          onChange={(e) => setRestaurant({ ...restaurant, coverImageUrl: e.target.value })} />
         <input className="input" placeholder="Téléphone" value={restaurant.phone || ''}
           onChange={(e) => setRestaurant({ ...restaurant, phone: e.target.value })} />
+
+        <div className="grid sm:grid-cols-2 gap-4 pt-2">
+          <ImageUpload
+            label="Logo (photo de profil)"
+            value={restaurant.logoUrl}
+            onChange={(url) => setRestaurant({ ...restaurant, logoUrl: url })}
+            shape="square"
+            size={140}
+            folder="tif/restaurants/logos"
+          />
+          <ImageUpload
+            label="Image de couverture"
+            value={restaurant.coverImageUrl}
+            onChange={(url) => setRestaurant({ ...restaurant, coverImageUrl: url })}
+            shape="wide"
+            size={160}
+            folder="tif/restaurants/covers"
+          />
+        </div>
       </div>
 
       <div className="card p-5 mb-4 space-y-3">

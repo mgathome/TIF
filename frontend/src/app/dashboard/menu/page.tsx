@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { api, formatPrice } from '@/lib/api';
 import type { MenuItem, Restaurant } from '@/lib/types';
 import { Loading } from '@/components/Loading';
+import { ImageUpload } from '@/components/ImageUpload';
 
 interface FormState {
   id?: string;
@@ -133,8 +134,14 @@ export default function DashboardMenuPage() {
                   value={(editing.priceCents / 100).toFixed(2)}
                   onChange={(e) => setEditing({ ...editing, priceCents: Math.round(parseFloat(e.target.value) * 100) })} />
               </div>
-              <input className="input" placeholder="URL image (optionnel)" value={editing.imageUrl}
-                onChange={(e) => setEditing({ ...editing, imageUrl: e.target.value })} />
+              <ImageUpload
+                label="Photo du plat (optionnel)"
+                value={editing.imageUrl}
+                onChange={(url) => setEditing({ ...editing, imageUrl: url })}
+                shape="square"
+                size={140}
+                folder="tif/menu-items"
+              />
               <div className="grid grid-cols-2 gap-2 text-sm">
                 <Toggle label="Disponible" value={editing.isAvailable} onChange={(v) => setEditing({ ...editing, isAvailable: v })} />
                 <Toggle label="Végétarien" value={editing.isVegetarian} onChange={(v) => setEditing({ ...editing, isVegetarian: v })} />

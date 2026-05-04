@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
+import { ImageUpload } from '@/components/ImageUpload';
 
 export default function SetupRestaurantPage() {
   const router = useRouter();
@@ -13,6 +14,7 @@ export default function SetupRestaurantPage() {
     offersPickup: true, offersDelivery: false,
     deliveryFeeCents: 350, minOrderCents: 1000, prepTimeMin: 25,
     coverImageUrl: '',
+    logoUrl: '',
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -40,11 +42,29 @@ export default function SetupRestaurantPage() {
       <p className="text-tif-gray-500 mb-8">Quelques infos et c'est parti.</p>
 
       <form onSubmit={submit} className="space-y-4">
-        <div className="card p-5 space-y-3">
+        <div className="card p-5 space-y-4">
           <input className="input" placeholder="Nom du restaurant" required value={form.name} onChange={(e) => set('name', e.target.value)} />
           <input className="input" placeholder="Type de cuisine (italien, japonais...)" value={form.cuisineType} onChange={(e) => set('cuisineType', e.target.value)} />
           <textarea className="input" placeholder="Description" rows={3} value={form.description} onChange={(e) => set('description', e.target.value)} />
-          <input className="input" placeholder="URL de l'image de couverture" value={form.coverImageUrl} onChange={(e) => set('coverImageUrl', e.target.value)} />
+
+          <div className="grid sm:grid-cols-2 gap-4 pt-2">
+            <ImageUpload
+              label="Logo (photo de profil)"
+              value={form.logoUrl}
+              onChange={(url) => set('logoUrl', url)}
+              shape="square"
+              size={140}
+              folder="tif/restaurants/logos"
+            />
+            <ImageUpload
+              label="Image de couverture"
+              value={form.coverImageUrl}
+              onChange={(url) => set('coverImageUrl', url)}
+              shape="wide"
+              size={160}
+              folder="tif/restaurants/covers"
+            />
+          </div>
         </div>
 
         <div className="card p-5 space-y-3">
