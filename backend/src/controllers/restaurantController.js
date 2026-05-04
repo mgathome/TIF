@@ -4,31 +4,38 @@ const { NotFound, Forbidden } = require('../utils/errors');
 const { geocode } = require('../services/geocoding');
 
 // === Schemas ===
+// Helper : transforme null/'' en undefined pour les champs optionnels
+const nullableString = (max) => z.preprocess(
+  (v) => (v === null || v === '' ? undefined : v),
+  z.string().max(max).optional()
+);
+const nullableUrl = () => z.preprocess(
+  (v) => (v === null || v === '' ? undefined : v),
+  z.string().url().optional()
+);
+const nullableEmail = () => z.preprocess(
+  (v) => (v === null || v === '' ? undefined : v),
+  z.string().email().optional()
+);
+
 const createSchema = z.object({
   name: z.string().min(1).max(120),
-  description: z.string().max(2000).optional(),
-  cuisineType: z.string().max(80).optional(),
+  description: nullableString(2000),
+  cuisineType: nullableString(80),
   addressLine1: z.string().min(1).max(200),
-  addressLine2: z.string().max(200).optional(),
+  addressLine2: nullableString(200),
   city: z.string().min(1).max(120),
   postalCode: z.string().min(1).max(20),
-  phone: z.string().max(30).optional(),
-  email: z.string().email().optional(),
+  phone: nullableString(30),
+  email: nullableEmail(),
   offersPickup: z.boolean().default(true),
   offersDelivery: z.boolean().default(false),
   deliveryFeeCents: z.number().int().nonnegative().default(0),
   minOrderCents: z.number().int().nonnegative().default(0),
   prepTimeMin: z.number().int().positive().default(20),
   deliveryRadiusKm: z.number().min(0).max(50).default(5),
-  // Champs URL : on accepte null et chaine vide en plus de string url valide
-  coverImageUrl: z.preprocess(
-    (v) => (v === null || v === '' ? undefined : v),
-    z.string().url().optional()
-  ),
-  logoUrl: z.preprocess(
-    (v) => (v === null || v === '' ? undefined : v),
-    z.string().url().optional()
-  ),
+  coverImageUrl: nullableUrl(),
+  logoUrl: nullableUrl(),
 });
 
 const updateSchema = createSchema.partial().extend({

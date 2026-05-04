@@ -2,10 +2,15 @@ const { z } = require('zod');
 const { query } = require('../config/database');
 const { NotFound, Forbidden } = require('../utils/errors');
 
+const nullableStr = (max) => z.preprocess(
+  (v) => (v === null || v === '' ? undefined : v),
+  z.string().max(max).optional()
+);
+
 const itemSchema = z.object({
   name: z.string().min(1).max(140),
-  description: z.string().max(2000).optional(),
-  category: z.string().max(80).optional(),
+  description: nullableStr(2000),
+  category: nullableStr(80),
   priceCents: z.number().int().nonnegative(),
   imageUrl: z.preprocess(
     (v) => (v === null || v === '' ? undefined : v),

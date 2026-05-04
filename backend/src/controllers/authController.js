@@ -38,14 +38,20 @@ function publicUser(u) {
   };
 }
 
+// Tolere null et chaine vide pour les champs optionnels
+const nullableStr = (max) => z.preprocess(
+  (v) => (v === null || v === '' ? undefined : v),
+  z.string().max(max).optional()
+);
+
 const updateProfileSchema = z.object({
-  firstName: z.string().min(1).max(80).optional(),
-  lastName:  z.string().min(1).max(80).optional(),
-  phone:     z.string().max(30).optional(),
-  addressLine1: z.string().max(200).optional(),
-  addressLine2: z.string().max(200).optional(),
-  city:         z.string().max(120).optional(),
-  postalCode:   z.string().max(20).optional(),
+  firstName: nullableStr(80),
+  lastName:  nullableStr(80),
+  phone:     nullableStr(30),
+  addressLine1: nullableStr(200),
+  addressLine2: nullableStr(200),
+  city:         nullableStr(120),
+  postalCode:   nullableStr(20),
 });
 
 function setRefreshCookie(res, token) {
