@@ -20,8 +20,15 @@ const createSchema = z.object({
   minOrderCents: z.number().int().nonnegative().default(0),
   prepTimeMin: z.number().int().positive().default(20),
   deliveryRadiusKm: z.number().min(0).max(50).default(5),
-  coverImageUrl: z.string().url().optional(),
-  logoUrl: z.string().url().optional(),
+  // Champs URL : on accepte null et chaine vide en plus de string url valide
+  coverImageUrl: z.preprocess(
+    (v) => (v === null || v === '' ? undefined : v),
+    z.string().url().optional()
+  ),
+  logoUrl: z.preprocess(
+    (v) => (v === null || v === '' ? undefined : v),
+    z.string().url().optional()
+  ),
 });
 
 const updateSchema = createSchema.partial().extend({

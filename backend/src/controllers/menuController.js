@@ -7,7 +7,10 @@ const itemSchema = z.object({
   description: z.string().max(2000).optional(),
   category: z.string().max(80).optional(),
   priceCents: z.number().int().nonnegative(),
-  imageUrl: z.string().url().optional().or(z.literal('')),
+  imageUrl: z.preprocess(
+    (v) => (v === null || v === '' ? undefined : v),
+    z.string().url().optional()
+  ),
   isAvailable: z.boolean().default(true),
   isVegetarian: z.boolean().default(false),
   isVegan: z.boolean().default(false),
