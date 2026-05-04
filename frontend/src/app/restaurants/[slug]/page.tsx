@@ -63,6 +63,54 @@ export default function RestaurantPage() {
       {/* Menu */}
       <div className="section py-10 grid lg:grid-cols-[1fr_320px] gap-10">
         <div>
+          {/* Bloc infos pratiques */}
+          <div className="card p-5 mb-6 flex flex-wrap gap-x-6 gap-y-3 text-sm">
+            {/* Adresse */}
+            <div className="flex items-start gap-2">
+              <span className="text-base">📍</span>
+              <div>
+                <div className="font-medium text-tif-black">
+                  {restaurant.address.line1}
+                  {restaurant.address.line2 && <>, {restaurant.address.line2}</>}
+                </div>
+                <div className="text-tif-gray-500">
+                  {restaurant.address.postalCode} {restaurant.address.city}
+                </div>
+                <a
+                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                    `${restaurant.address.line1}, ${restaurant.address.postalCode} ${restaurant.address.city}`
+                  )}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs text-tif-violet font-medium hover:underline"
+                >
+                  Itinéraire →
+                </a>
+              </div>
+            </div>
+
+            {/* Téléphone */}
+            {restaurant.phone && (
+              <div className="flex items-start gap-2">
+                <span className="text-base">📞</span>
+                <a href={`tel:${restaurant.phone}`} className="text-tif-black hover:text-tif-violet">
+                  {restaurant.phone}
+                </a>
+              </div>
+            )}
+
+            {/* Modes de service */}
+            <div className="flex items-start gap-2">
+              <span className="text-base">🍽️</span>
+              <div>
+                {restaurant.offersPickup && <div>📦 À emporter</div>}
+                {restaurant.offersDelivery && (
+                  <div>🛵 Livraison ({restaurant.deliveryRadiusKm} km autour)</div>
+                )}
+              </div>
+            </div>
+          </div>
+
           {restaurant.description && (
             <p className="text-tif-gray-700 mb-8 max-w-2xl">{restaurant.description}</p>
           )}

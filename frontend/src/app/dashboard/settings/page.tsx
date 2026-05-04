@@ -35,6 +35,11 @@ export default function DashboardSettingsPage() {
           deliveryRadiusKm: restaurant.deliveryRadiusKm,
           offersPickup: restaurant.offersPickup,
           offersDelivery: restaurant.offersDelivery,
+          // Adresse (re-geocodee automatiquement cote backend si modifiee)
+          addressLine1: restaurant.address?.line1,
+          addressLine2: restaurant.address?.line2,
+          city: restaurant.address?.city,
+          postalCode: restaurant.address?.postalCode,
         },
       });
       setRestaurant(updated);
@@ -82,6 +87,34 @@ export default function DashboardSettingsPage() {
             folder="tif/restaurants/covers"
           />
         </div>
+      </div>
+
+      {/* === Adresse === */}
+      <div className="card p-5 mb-4 space-y-3">
+        <h2 className="font-semibold">📍 Adresse</h2>
+        <p className="text-xs text-tif-gray-500">
+          Modifier l'adresse re-géolocalise automatiquement le restaurant pour les clients.
+        </p>
+        <input className="input" placeholder="Adresse (rue + numéro)" value={restaurant.address?.line1 || ''}
+          onChange={(e) => setRestaurant({ ...restaurant, address: { ...restaurant.address!, line1: e.target.value } })} />
+        <input className="input" placeholder="Complément (étage, bâtiment...)" value={restaurant.address?.line2 || ''}
+          onChange={(e) => setRestaurant({ ...restaurant, address: { ...restaurant.address!, line2: e.target.value } })} />
+        <div className="grid grid-cols-3 gap-2">
+          <input className="input col-span-1" placeholder="Code postal" value={restaurant.address?.postalCode || ''}
+            onChange={(e) => setRestaurant({ ...restaurant, address: { ...restaurant.address!, postalCode: e.target.value } })} />
+          <input className="input col-span-2" placeholder="Ville" value={restaurant.address?.city || ''}
+            onChange={(e) => setRestaurant({ ...restaurant, address: { ...restaurant.address!, city: e.target.value } })} />
+        </div>
+
+        {restaurant.latitude && restaurant.longitude ? (
+          <div className="text-xs text-green-700 bg-green-50 p-2 rounded">
+            ✅ Restaurant géolocalisé ({restaurant.latitude.toFixed(4)}, {restaurant.longitude.toFixed(4)})
+          </div>
+        ) : (
+          <div className="text-xs text-amber-700 bg-amber-50 p-2 rounded">
+            ⚠ Adresse non géolocalisée — vérifiez qu'elle est complète et correcte.
+          </div>
+        )}
       </div>
 
       <div className="card p-5 mb-4 space-y-3">
