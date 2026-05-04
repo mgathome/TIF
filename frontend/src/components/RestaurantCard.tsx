@@ -30,12 +30,15 @@ export function RestaurantCard({ restaurant }: { restaurant: Restaurant }) {
         <p className="text-sm text-tif-gray-500 mt-1 line-clamp-2">
           {restaurant.description || ' '}
         </p>
-        <div className="flex items-center gap-4 mt-3 text-xs text-tif-gray-700">
+        <div className="flex items-center gap-4 mt-3 text-xs text-tif-gray-700 flex-wrap">
           <span>⏱ {restaurant.prepTimeMin} min</span>
           {restaurant.offersDelivery && (
-            <span>🚚 {formatPrice(restaurant.deliveryFeeCents)}</span>
+            <span>🛵 {formatPrice(restaurant.deliveryFeeCents)}</span>
           )}
           {restaurant.offersPickup && <span>📦 À emporter</span>}
+          {typeof restaurant.distanceKm === 'number' && (
+            <span className="font-medium text-tif-violet">📍 {restaurant.distanceKm.toFixed(1)} km</span>
+          )}
         </div>
         <div className="text-xs text-tif-gray-500 mt-2">{restaurant.address.city}</div>
       </div>

@@ -5,20 +5,35 @@ import Link from 'next/link';
 import { api } from '@/lib/api';
 import type { Restaurant } from '@/lib/types';
 import { RestaurantCard } from '@/components/RestaurantCard';
+import { RestaurantMap } from '@/components/RestaurantMap';
 import { Mascot } from '@/components/Mascot';
 import { Loading } from '@/components/Loading';
 import { EmptyState } from '@/components/EmptyState';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function HomePage() {
+  const { user } = useAuth();
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  /** Mode delivery : ne montre que les restos qui livrent chez le client */
+  const [filterMode, setFilterMode] = useState<'all' | 'delivery'>('all');
+  /** Vue : grille de cards ou carte */
+  const [view, setView] = useState<'grid' | 'map'>('grid');
 
   useEffect(() => {
-    api<{ items: Restaurant[] }>('/restaurants?limit=20', { auth: false })
+    setLoading(true);
+    const params = new URLSearchParams();
+    params.set('limit', '20');
+    if (user?.latitude && user?.longitude) {
+      params.set('clientLat', String(user.latitude));
+      params.set('clientLon', String(user.longitude));
+      if (filterMode === 'delivery') params.set('forDelivery', 'true');
+    }
+    api<{ items: Restaurant[] }>(`/restaurants?${params}`, { auth: false })
       .then(({ items }) => setRestaurants(items))
       .finally(() => setLoading(false));
-  }, []);
+  }, [user, filterMode]);
 
   const filtered = restaurants.filter((r) =>
     !search || r.name.toLowerCase().includes(search.toLowerCase())
@@ -180,9 +195,58 @@ export default function HomePage() {
           <h2 className="font-display font-bold text-3xl sm:text-4xl text-tif-black mb-2">
             Restaurants à découvrir
           </h2>
-          <p className="text-tif-gray-700 mb-8">
-            {restaurants.length} restaurant{restaurants.length > 1 ? 's' : ''} disponible{restaurants.length > 1 ? 's' : ''} près de chez vous
+          <p className="text-tif-gray-700 mb-4">
+            {restaurants.length} restaurant{restaurants.length > 1 ? 's' : ''} disponible{restaurants.length > 1 ? 's' : ''}
           </p>
+
+          {/* Filtre livraison : visible uniquement si le user a une adresse geocodee */}
+          {user?.latitude && user?.longitude ? (
+            <div className="flex items-center gap-2 mb-6 flex-wrap">
+              <button
+                onClick={() => setFilterMode('all')}
+                className={`px-4 py-2 rounded-full text-sm font-medium border-2 transition ${
+                  filterMode === 'all' ? 'border-tif-violet bg-tif-violet text-white' : 'border-tif-gray-200 bg-white text-tif-black'
+                }`}
+              >Tous les restaurants</button>
+              <button
+                onClick={() => setFilterMode('delivery')}
+                className={`px-4 py-2 rounded-full text-sm font-medium border-2 transition ${
+                  filterMode === 'delivery' ? 'border-tif-violet bg-tif-violet text-white' : 'border-tif-gray-200 bg-white text-tif-black'
+                }`}
+              >🛵 Qui livrent chez moi</button>
+              <span className="text-xs text-tif-gray-500 ml-1">
+                Triés par proximité depuis {user.address?.city || 'votre adresse'}
+              </span>
+            </div>
+          ) : user ? (
+            <div className="card p-4 mb-6 bg-tif-yellow/20 border border-tif-yellow flex items-center gap-3">
+              <span className="text-2xl">📍</span>
+              <div className="flex-1 text-sm">
+                <strong>Renseignez votre adresse</strong> pour voir les restos qui livrent chez vous.
+              </div>
+              <Link href="/profile" className="btn-primary text-sm py-2">Mon adresse →</Link>
+            </div>
+          ) : (
+            <div className="card p-4 mb-6 bg-tif-violet/10 border border-tif-violet/30 text-sm">
+              💡 <Link href="/login" className="font-semibold text-tif-violet underline">Connectez-vous</Link> pour voir les restos qui livrent à votre adresse.
+            </div>
+          )}
+
+          {/* Toggle Liste / Carte */}
+          <div className="flex items-center gap-2 mb-4">
+            <button
+              onClick={() => setView('grid')}
+              className={`px-3 py-1.5 rounded-tif text-sm font-medium border-2 ${
+                view === 'grid' ? 'border-tif-violet bg-tif-violet text-white' : 'border-tif-gray-200 bg-white'
+              }`}
+            >📋 Liste</button>
+            <button
+              onClick={() => setView('map')}
+              className={`px-3 py-1.5 rounded-tif text-sm font-medium border-2 ${
+                view === 'map' ? 'border-tif-violet bg-tif-violet text-white' : 'border-tif-gray-200 bg-white'
+              }`}
+            >🗺️ Carte</button>
+          </div>
 
           {loading ? (
             <Loading />
@@ -194,6 +258,13 @@ export default function HomePage() {
                   ? "Essayez avec d'autres mots-clés."
                   : "Les premiers restaurants seront bientôt en ligne. Revenez vite."
               }
+            />
+          ) : view === 'map' ? (
+            <RestaurantMap
+              restaurants={filtered}
+              clientLat={user?.latitude || undefined}
+              clientLon={user?.longitude || undefined}
+              height={500}
             />
           ) : (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">

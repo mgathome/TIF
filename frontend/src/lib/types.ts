@@ -9,6 +9,15 @@ export interface User {
   firstName?: string;
   lastName?: string;
   phone?: string;
+  address?: {
+    line1: string;
+    line2?: string;
+    city: string;
+    postalCode: string;
+    country: string;
+  } | null;
+  latitude?: number | null;
+  longitude?: number | null;
 }
 
 export interface RestaurantAddress {
@@ -34,7 +43,12 @@ export interface Restaurant {
   deliveryFeeCents: number;
   minOrderCents: number;
   prepTimeMin: number;
+  deliveryRadiusKm: number;
+  latitude?: number | null;
+  longitude?: number | null;
   isPublished: boolean;
+  /** Distance entre le client et le resto, en km (calculee si le client a une adresse) */
+  distanceKm?: number;
 }
 
 export interface MenuItem {

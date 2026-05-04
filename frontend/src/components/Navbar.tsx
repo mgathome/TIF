@@ -42,6 +42,9 @@ export function Navbar() {
           <Link href="/" className="hover:text-tif-violet">Accueil</Link>
           <Link href="/restaurants" className="hover:text-tif-violet">Restaurants</Link>
           <Link href="/orders" className="hover:text-tif-violet">Mes commandes</Link>
+          {user && user.role === 'client' && (
+            <Link href="/profile" className="hover:text-tif-violet">Mon profil</Link>
+          )}
         </nav>
         <div className="flex items-center gap-3">
           <Link href="/cart" className="relative btn-ghost" aria-label="Panier">

@@ -5,6 +5,9 @@
 /* === Police === */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
 
+/* === Leaflet (carte) === */
+@import url('https://unpkg.com/leaflet@1.9.4/dist/leaflet.css');
+
 /* === Base === */
 :root {
   --color-violet: #5B2EFF;

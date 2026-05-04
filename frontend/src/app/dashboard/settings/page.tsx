@@ -32,6 +32,7 @@ export default function DashboardSettingsPage() {
           deliveryFeeCents: restaurant.deliveryFeeCents,
           minOrderCents: restaurant.minOrderCents,
           prepTimeMin: restaurant.prepTimeMin,
+          deliveryRadiusKm: restaurant.deliveryRadiusKm,
           offersPickup: restaurant.offersPickup,
           offersDelivery: restaurant.offersDelivery,
         },
@@ -112,6 +113,27 @@ export default function DashboardSettingsPage() {
               onChange={(e) => setRestaurant({ ...restaurant, prepTimeMin: parseInt(e.target.value, 10) })} />
           </div>
         </div>
+
+        {restaurant.offersDelivery && (
+          <div className="mt-3">
+            <label className="text-sm flex justify-between">
+              <span>📍 Rayon de livraison maximum</span>
+              <span className="font-bold text-tif-violet">{restaurant.deliveryRadiusKm} km</span>
+            </label>
+            <input
+              type="range" min={1} max={30} step={0.5}
+              value={restaurant.deliveryRadiusKm}
+              onChange={(e) => setRestaurant({ ...restaurant, deliveryRadiusKm: parseFloat(e.target.value) })}
+              className="w-full accent-tif-violet mt-1"
+            />
+            <div className="flex justify-between text-xs text-tif-gray-500">
+              <span>1 km</span><span>30 km</span>
+            </div>
+            <p className="text-xs text-tif-gray-500 mt-1">
+              Les clients hors de cette zone ne verront pas votre restaurant en livraison.
+            </p>
+          </div>
+        )}
       </div>
 
       <div className="card p-5 mb-6">

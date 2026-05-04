@@ -13,6 +13,7 @@ export default function SetupRestaurantPage() {
     phone: '',
     offersPickup: true, offersDelivery: false,
     deliveryFeeCents: 350, minOrderCents: 1000, prepTimeMin: 25,
+    deliveryRadiusKm: 5,
     coverImageUrl: '',
     logoUrl: '',
   });
@@ -88,12 +89,32 @@ export default function SetupRestaurantPage() {
             Livraison (gérée par mes soins)
           </label>
           {form.offersDelivery && (
-            <div>
-              <label className="text-sm">Frais de livraison (€)</label>
-              <input className="input" type="number" step="0.10" min={0}
-                value={(form.deliveryFeeCents / 100).toFixed(2)}
-                onChange={(e) => set('deliveryFeeCents', Math.round(parseFloat(e.target.value) * 100))} />
-            </div>
+            <>
+              <div>
+                <label className="text-sm">Frais de livraison (€)</label>
+                <input className="input" type="number" step="0.10" min={0}
+                  value={(form.deliveryFeeCents / 100).toFixed(2)}
+                  onChange={(e) => set('deliveryFeeCents', Math.round(parseFloat(e.target.value) * 100))} />
+              </div>
+              <div>
+                <label className="text-sm flex justify-between">
+                  <span>Rayon de livraison maximum</span>
+                  <span className="font-bold text-tif-violet">{form.deliveryRadiusKm} km</span>
+                </label>
+                <input
+                  type="range" min={1} max={30} step={0.5}
+                  value={form.deliveryRadiusKm}
+                  onChange={(e) => set('deliveryRadiusKm', parseFloat(e.target.value))}
+                  className="w-full accent-tif-violet"
+                />
+                <div className="flex justify-between text-xs text-tif-gray-500 mt-1">
+                  <span>1 km</span><span>30 km</span>
+                </div>
+                <p className="text-xs text-tif-gray-500 mt-1">
+                  Les clients hors de cette zone ne pourront pas commander en livraison.
+                </p>
+              </div>
+            </>
           )}
           <div className="grid grid-cols-2 gap-3">
             <div>

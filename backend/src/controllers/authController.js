@@ -4,6 +4,7 @@ const { query } = require('../config/database');
 const { signAccessToken, signRefreshToken, verifyRefreshToken } = require('../utils/jwt');
 const { Unauthorized, Conflict } = require('../utils/errors');
 const env = require('../config/env');
+const { geocode } = require('../services/geocoding');
 
 const BCRYPT_ROUNDS = 12;
 
@@ -25,8 +26,27 @@ function publicUser(u) {
   return {
     id: u.id, email: u.email, role: u.role,
     firstName: u.first_name, lastName: u.last_name, phone: u.phone,
+    address: u.address_line1 ? {
+      line1: u.address_line1,
+      line2: u.address_line2 || null,
+      city: u.city,
+      postalCode: u.postal_code,
+      country: u.country,
+    } : null,
+    latitude:  u.latitude  !== undefined && u.latitude  !== null ? parseFloat(u.latitude)  : null,
+    longitude: u.longitude !== undefined && u.longitude !== null ? parseFloat(u.longitude) : null,
   };
 }
+
+const updateProfileSchema = z.object({
+  firstName: z.string().min(1).max(80).optional(),
+  lastName:  z.string().min(1).max(80).optional(),
+  phone:     z.string().max(30).optional(),
+  addressLine1: z.string().max(200).optional(),
+  addressLine2: z.string().max(200).optional(),
+  city:         z.string().max(120).optional(),
+  postalCode:   z.string().max(20).optional(),
+});
 
 function setRefreshCookie(res, token) {
   res.cookie('refreshToken', token, {
@@ -120,11 +140,61 @@ async function logout(req, res) {
 
 async function me(req, res) {
   const { rows } = await query(
-    'SELECT id, email, role, first_name, last_name, phone FROM users WHERE id = $1',
+    `SELECT id, email, role, first_name, last_name, phone,
+            address_line1, address_line2, city, postal_code, country, latitude, longitude
+     FROM users WHERE id = $1`,
     [req.user.id]
   );
   if (rows.length === 0) throw new Unauthorized();
   res.json({ user: publicUser(rows[0]) });
 }
 
-module.exports = { register, login, refresh, logout, me, registerSchema, loginSchema };
+// PATCH /api/auth/me - mise a jour du profil + adresse (avec geocodage auto)
+async function updateMe(req, res) {
+  const b = req.body;
+  const map = {
+    firstName: 'first_name',
+    lastName:  'last_name',
+    phone:     'phone',
+    addressLine1: 'address_line1',
+    addressLine2: 'address_line2',
+    city:         'city',
+    postalCode:   'postal_code',
+  };
+  const sets = []; const values = [];
+  for (const [k, col] of Object.entries(map)) {
+    if (b[k] !== undefined) { values.push(b[k] || null); sets.push(`${col} = $${values.length}`); }
+  }
+
+  // Si l'adresse est touchee, on (re-)geocode
+  if (b.addressLine1 !== undefined || b.city !== undefined || b.postalCode !== undefined) {
+    const { rows: [current] } = await query(
+      'SELECT address_line1, city, postal_code FROM users WHERE id = $1',
+      [req.user.id]
+    );
+    const finalLine = b.addressLine1 ?? current.address_line1;
+    const finalCity = b.city ?? current.city;
+    const finalPostal = b.postalCode ?? current.postal_code;
+    if (finalLine && finalCity && finalPostal) {
+      const geo = await geocode({
+        addressLine: finalLine, city: finalCity, postalCode: finalPostal,
+      });
+      if (geo) {
+        values.push(geo.lat); sets.push(`latitude = $${values.length}`);
+        values.push(geo.lon); sets.push(`longitude = $${values.length}`);
+      }
+    }
+  }
+
+  if (sets.length === 0) return res.json({ user: publicUser((await query('SELECT * FROM users WHERE id = $1', [req.user.id])).rows[0]) });
+
+  values.push(req.user.id);
+  const { rows } = await query(
+    `UPDATE users SET ${sets.join(', ')} WHERE id = $${values.length}
+     RETURNING id, email, role, first_name, last_name, phone, address_line1, address_line2, city, postal_code, country, latitude, longitude`,
+    values
+  );
+  res.json({ user: publicUser(rows[0]) });
+}
+
+module.exports = { register, login, refresh, logout, me, updateMe, registerSchema, loginSchema, updateProfileSchema };
